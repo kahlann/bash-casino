@@ -1,0 +1,85 @@
+# Test function - did they enter a money value greater than 0?
+# First argument must be the money variable
+moneytest(){
+    if [[ -z $1 ]]; then
+        ((i++))
+        elif [[ $1 -le 0 ]]; then
+        ((i++))
+    else
+        money=$1
+    fi
+}
+
+# Test function - did they enter a valid number of games?
+# First argument must be the numgames variable
+gamestest(){
+    if [[ $1 -le 0 || -z $1 ]]; then
+        ((i++))
+        elif [[ $1 -le 0 ]]; then
+        ((i++))
+    else
+        declare -i numgames=$1
+    fi
+}
+
+# Function to get the money to bring into the casino
+getmoney(){
+    # prompt the user to tell us how much money they're brining in
+    read -p "How much money would you like to bring into the casino? " money
+    
+    # If they don't give an answer, start a counter and prompt them again
+    declare -i i=0
+    
+    # Keep prompting for money
+    while [[ i -lt 10 && -z $money ]] || [[ i -lt 10 && $money -le 0 ]]
+    do
+        # The prompt will depend on how many times they've already been asked
+        case $i in
+            0) read -p "Please enter the amount of money you'd like to bring into the casino. " money
+            moneytest $money;;
+            1) read -p "Please stop stop messing around, enter a number! " money
+            moneytest $money;;
+            2) read -p "Are you taking the piss? Give us your money! " money
+            moneytest $money;;
+            3) read -p "C'mon, man! If you don't want to play just hit Ctrl+C. Otherwise, enter a monetary value: " money
+            moneytest $money;;
+            4) read -p "Are you for real? Final chance! Enter the amount of money: " money
+            moneytest $money;;
+            5) read -p "OK you called my bluff. But this is your last chance! Money here: " money
+            moneytest $money;;
+            6) exit 0
+        esac
+    done
+    # If they do enter a value, say thank you!
+    printf "Thanks. "
+}
+
+# Function to get the number of games
+getgames(){
+    # Prompt for the number of games
+    read -p "How many games would you like to play? " numgames
+    
+    # If they don't give an answer, start a counter, prompt them again
+    declare -i i=0
+    
+    # Keep prompting for number of games
+    while [[ i -lt 10 && -z $numgames ]] || [[ i -lt 10 && $numgames -le 0 ]]
+    do
+        # The prompt will depend on how many times they've already been asked
+        case $i in
+            0) read -p "Please enter the number of games you'd like to play. " numgames
+            gamestest $numgames;;
+            1) read -p "Please stop messing around, enter a valid number of games! " numgames
+            gamestest $numgames;;
+            2) read -p "Are you taking the piss? Enter the number of games! " numgames
+            gamestest $numgames;;
+            3) read -p "C'mon, man! If you don't want to play just hit Ctrl+C. Otherwise, enter the number of games: " numgames
+            gamestest $numgames;;
+            4) read -p "Are you for real? Final chance! Enter the number of games: " numgames
+            gamestest $numgames;;
+            5) read -p "OK you called my bluff. But this is your last chance! Number of games here: " numgames
+            gamestest $numgames;;
+            6) exit 0
+        esac
+    done
+}
