@@ -194,10 +194,6 @@ getgames(){
     done
 }
 
-
-
-
-
 # Define a function that prompts for a wager
 wagerprompt(){
     # Prompt for a wager
@@ -522,8 +518,6 @@ slots(){
         ((money=$money-$wager))
     fi
 }
-
-
 
 
 #####################
