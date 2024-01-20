@@ -5,11 +5,22 @@
 ################
 
 # Set some text colours
+# Green text
 greentext="\033[32m"
+# Bold
 bold="\033[1m"
+# Regular text
 normal="\033[0m"
+# Underlined
 ulinered="\033[4;31;40m"
+# red text with black background
 red="\033[31;40m"
+
+# Regex for a valid name
+validname="^[a-zA-Z[:blank:]]+$"
+
+# Maximum value for anything
+maxval=$((2**32))
 
 ########################
 ### DEFINE FUNCTIONS ###
@@ -17,8 +28,10 @@ red="\033[31;40m"
 # Test function - did they enter a name?
 # First argument must be the name variable
 nametest(){
-    if [[ -z $1 ]]; then
+    # If they did not enter a name, or the input contains something other than alpha caharcters, iterate the counter for the next message
+    if [[ ! $name =~ $validname ]] || [[ -z $1 ]]; then
         ((i++))
+        # if the name is valid, set the name variable to that input string
     else
         name=$1
     fi
@@ -27,10 +40,10 @@ nametest(){
 # Test function - did they enter a valid age?
 # First argument must be the age variable
 agetest(){
-    if [[ ! $1 -gt 0 || -z $1 ]]; then
+    # If the age is not greater than 0, does not exist, is not an integer, has a leading 0 (will be interprested as an octal number), or greater than/equal to 2^32, iterate the counter for the next message
+    if [[ ! $1 -gt 0 ]] | [[ -z $1  ]] || [[ ! $1 =~ ^[0-9]+$ ]] || [[ ${1:0:1} -eq 0 ]] || [[ $1 -ge $maxval ]]; then
         ((i++))
-        elif [[ $1 -le 0 ]]; then
-        ((i++))
+        # If it's a valid age, set the age variable to that input
     else
         age=$1
     fi
@@ -45,13 +58,13 @@ getname(){
     declare -i i=0
     
     # Keep prompting for a name
-    while [[ i -lt 10 && -z $name ]]
+    while [[ i -lt 10 && (-z $name || ! $name =~ $validname)]]
     do
         # The prompt will depend on how many times they've already been asked
         case $i in
             0) read -p "Please enter your name. " name
             nametest $name;;
-            1) read -p "Please stop just pressing return, enter your name! " name
+            1) read -p "Please enter your name! " name
             nametest $name;;
             2) read -p "Are you taking the piss? Enter your name! " name
             nametest $name;;
@@ -77,7 +90,8 @@ getage(){
     declare -i i=0
     
     # Keep prompting for an age
-    while [[ i -lt 10 && -z $age ]] || [[ i -lt 10 && $age -lt 0 ]]
+    firstletter=${word:0:1}
+    while [[ i -lt 10 && -z $age ]] || [[ i -lt 10 && $age -lt 0 ]] || [[ ! $age =~ ^[0-9]+$ ]] || [[ ${age:0:1} -eq 0 ]] || [[ $age -ge $maxval ]]
     do
         # The prompt will depend on how many times they've already been asked
         case $i in
@@ -108,13 +122,13 @@ getage(){
     fi
 }
 
-# Test function - did they enter a money value greater than 0?
+# Test function - money
 # First argument must be the money variable
 moneytest(){
-    if [[ -z $1 ]]; then
+    # If they did not enter a value, the value was less than 0, is not an integer, or has a leading 0 (interpreted as an octal), increment the counter for a new message
+    if [[ -z $1 ]] || [[ $1 -le 0 ]] || [[ ! $1 =~ ^[0-9]+$ ]] || [[ ${1:0:1} -eq 0 ]] || [[ $1 -ge $maxval ]]; then
         ((i++))
-        elif [[ $1 -le 0 ]]; then
-        ((i++))
+        # If they did enter a valid number, that number is the amount of money they bring in
     else
         money=$1
     fi
@@ -123,10 +137,10 @@ moneytest(){
 # Test function - did they enter a valid number of games?
 # First argument must be the numgames variable
 gamestest(){
-    if [[ $1 -le 0 || -z $1 ]]; then
+    # If they did not enter a value, the value was less than 0, not an integer, or has a leading 0 (interpreted as an octal), increment the counter for a new message
+    if [[ $1 -le 0 ]] || [[ -z $1 ]] || [[ ! $1 =~ ^[0-9]+$ ]] || [[ ${1:0:1} -eq 0 ]] || [[ $1 -ge $maxval ]]; then
         ((i++))
-        elif [[ $1 -le 0 ]]; then
-        ((i++))
+        # If they did enter a valid number, that number is the number of games they play
     else
         declare -i numgames=$1
     fi
@@ -141,7 +155,7 @@ getmoney(){
     declare -i i=0
     
     # Keep prompting for money
-    while [[ i -lt 10 && -z $money ]] || [[ i -lt 10 && $money -le 0 ]]
+    while [[ i -lt 10 && -z $money ]] || [[ i -lt 10 && $money -le 0 ]] || [[ ! $money =~ ^[0-9]+$ ]] || [[ ${money:0:1} -eq 0 ]] || [[ $money -ge $maxval ]]
     do
         # The prompt will depend on how many times they've already been asked
         case $i in
@@ -173,7 +187,7 @@ getgames(){
     declare -i i=0
     
     # Keep prompting for number of games
-    while [[ i -lt 10 && -z $numgames ]] || [[ i -lt 10 && $numgames -le 0 ]]
+    while [[ i -lt 10 && -z $numgames ]] || [[ i -lt 10 && $numgames -le 0 ]] || [[ ! $numgames =~ ^[0-9]+$ ]] || [[ ${numgames:0:1} -eq 0 ]] || [[ $numgames -ge $maxval ]]
     do
         # The prompt will depend on how many times they've already been asked
         case $i in
@@ -198,18 +212,29 @@ getgames(){
 wagerprompt(){
     # Prompt for a wager
     read -p "How much would you like to wager? " wager
-    # If no wager was set, set a random amount from the money the have remaining
-    if [[ -z $wager || $wager -eq 0 ]]; then
+    # counter for how many times we've asked for a wager
+    declare -i i=0
+    # If they enter a wager that is not an integer or has a leading 0
+    while ([[ ! $wager =~ ^[0-9]+$ ]] || [[ ${wager:0:1} -eq 0 ]] || [[ -z $wager ]] || [[ $wager -eq 0 ]] || [[ $wager -ge $maxval ]] || [[ $wager -gt $money ]]) && [[ i -lt 3 ]]
+    do
+        # Increment the counter for number of prompts
+        ((i++))
+        # If the entry was missing, not integer, had a leading 0, or less than 0
+        if ([[ ! $wager =~ ^[0-9]+$ ]] || [[ ${wager:0:1} -eq 0 ]] || [[ -z $wager ]] || [[ $wager -eq 0 ]]); then
+            read -p "Please enter an integer value for your wager." wager
+            # If the wager was too big (largr than bash will allow, or larger than the remaining money)
+            elif [[ $wager -ge $maxval ]] || [[ $wager -gt $money ]]; then
+            echo "Sorry, you've tried to wager more money than you have remaining."
+            read -p "How much would you like to wager? " wager
+        fi
+    done
+    printf "You have wagered \$%i on this game.\n" $wager
+    
+    # If no wager was set above (after 3 prompts), set a random amount from the money the have remaining
+    if ([[ ! $wager =~ ^[0-9]+$ ]] || [[ ${wager:0:1} -eq 0 ]] || [[ -z $wager ]] || [[ $wager -eq 0 ]] || [[ $wager -ge $maxval ]]) && [[ i -eq 3 ]]; then
         echo "No wager set. A random wager will be selected from your remaining money!"
         wager=$(( 1 + $RANDOM % $money ))
     fi
-    # If the wager was greater than the money they have remaining, prompt again
-    while [[ $wager -gt $money ]];
-    do
-        echo "Sorry, you've tried to wager more money than you have remaining."
-        read -p "How much would you like to wager? " wager
-    done
-    printf "You have wagered \$%i on this game.\n" $wager
 }
 
 # Blackjack score test
