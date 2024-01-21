@@ -1,0 +1,218 @@
+# Regex for a valid name
+validname="^[a-zA-Z[:blank:]]+$"
+
+# Maximum value for anything
+maxval=$((2**32))
+
+# Test function - did they enter a name?
+# First argument must be the name variable
+nametest(){
+    # If they did not enter a name, or the input contains something other than alpha caharcters, iterate the counter for the next message
+    if [[ ! $name =~ $validname ]] || [[ -z $1 ]]; then
+        ((i++))
+        # if the name is valid, set the name variable to that input string
+    else
+        name=$1
+    fi
+}
+
+# Test function - did they enter a valid age?
+# First argument must be the age variable
+agetest(){
+    # If the age is not greater than 0, does not exist, is not an integer, has a leading 0 (will be interprested as an octal number), or greater than/equal to 2^32, iterate the counter for the next message
+    if [[ ! $1 -gt 0 ]] | [[ -z $1  ]] || [[ ! $1 =~ ^[0-9]+$ ]] || [[ ${1:0:1} -eq 0 ]] || [[ $1 -ge $maxval ]]; then
+        ((i++))
+        # If it's a valid age, set the age variable to that input
+    else
+        age=$1
+    fi
+}
+
+# Function to get the player's name
+getname(){
+    # Request the player's name
+    read -p "What's your name? " name
+    
+    # If they don't give an answer, start a counter and prompt them again
+    declare -i i=0
+    
+    # Keep prompting for a name
+    while [[ i -lt 10 && (-z $name || ! $name =~ $validname)]]
+    do
+        # The prompt will depend on how many times they've already been asked
+        case $i in
+            0) read -p "Please enter your name. " name
+            nametest $name;;
+            1) read -p "Please enter your name! " name
+            nametest $name;;
+            2) read -p "Are you taking the piss? Enter your name! " name
+            nametest $name;;
+            3) read -p "C'mon, man! If you don't want to play just hit Ctrl+C. Otherwise, enter your name: " name
+            nametest $name;;
+            4) read -p "Are you for real? Final chance! Enter your name: " name
+            nametest $name;;
+            5) read -p "OK you called my bluff. But this is your last chance! Name here: " name
+            nametest $name;;
+            6) exit 0
+        esac
+    done
+    # If they do enter a name, say thank you!
+    printf "Thanks. "
+}
+
+# Function to get the player's age, and determine if they are old enough to play
+getage(){
+    # Prompt for the player's name
+    read -p "How old are you? " age
+    
+    # If they don't give an answer, start a counter, prompt them again
+    declare -i i=0
+    
+    # Keep prompting for an age
+    firstletter=${word:0:1}
+    while [[ i -lt 10 && -z $age ]] || [[ i -lt 10 && $age -lt 0 ]] || [[ ! $age =~ ^[0-9]+$ ]] || [[ ${age:0:1} -eq 0 ]] || [[ $age -ge $maxval ]]
+    do
+        # The prompt will depend on how many times they've already been asked
+        case $i in
+            0) read -p "Please enter your age. " age
+            agetest $age;;
+            1) read -p "Please stop messing around, enter your age! " age
+            agetest $age;;
+            2) read -p "Are you taking the piss? Enter your age! " age
+            agetest $age;;
+            3) read -p "C'mon, man! If you don't want to play just hit Ctrl+C. Otherwise, enter your age: " age
+            agetest $age;;
+            4) read -p "Are you for real? Final chance! Enter your age: " age
+            agetest $age;;
+            5) read -p "OK you called my bluff. But this is your last chance! Age here: " age
+            agetest $age;;
+            6) exit 0
+        esac
+    done
+    
+    # If they did enter an age, was the age less than 18?
+    if [[ $age -lt 18 ]]; then
+        # If they're a minor, kick 'em out!
+        echo "Sorry, $name, you're too young to be in a casino!"
+        exit 0
+        # Otherwise, welcome them to the casino
+    else
+        echo -e "\n🎲\tWelcome to The Bash Casino, $name!\t🎲"
+    fi
+}
+
+# Test function - money
+# First argument must be the money variable
+moneytest(){
+    # If they did not enter a value, the value was less than 0, is not an integer, or has a leading 0 (interpreted as an octal), increment the counter for a new message
+    if [[ -z $1 ]] || [[ $1 -le 0 ]] || [[ ! $1 =~ ^[0-9]+$ ]] || [[ ${1:0:1} -eq 0 ]] || [[ $1 -ge $maxval ]]; then
+        ((i++))
+        # If they did enter a valid number, that number is the amount of money they bring in
+    else
+        money=$1
+    fi
+}
+
+# Test function - did they enter a valid number of games?
+# First argument must be the numgames variable
+gamestest(){
+    # If they did not enter a value, the value was less than 0, not an integer, or has a leading 0 (interpreted as an octal), increment the counter for a new message
+    if [[ $1 -le 0 ]] || [[ -z $1 ]] || [[ ! $1 =~ ^[0-9]+$ ]] || [[ ${1:0:1} -eq 0 ]] || [[ $1 -ge $maxval ]]; then
+        ((i++))
+        # If they did enter a valid number, that number is the number of games they play
+    else
+        declare -i numgames=$1
+    fi
+}
+
+# Function to get the money to bring into the casino
+getmoney(){
+    # prompt the user to tell us how much money they're brining in
+    read -p "How much money would you like to bring into the casino? " money
+    
+    # If they don't give an answer, start a counter and prompt them again
+    declare -i i=0
+    
+    # Keep prompting for money
+    while [[ i -lt 10 && -z $money ]] || [[ i -lt 10 && $money -le 0 ]] || [[ ! $money =~ ^[0-9]+$ ]] || [[ ${money:0:1} -eq 0 ]] || [[ $money -ge $maxval ]]
+    do
+        # The prompt will depend on how many times they've already been asked
+        case $i in
+            0) read -p "Please enter the amount of money you'd like to bring into the casino. " money
+            moneytest $money;;
+            1) read -p "Please stop stop messing around, enter a number! " money
+            moneytest $money;;
+            2) read -p "Are you taking the piss? Give us your money! " money
+            moneytest $money;;
+            3) read -p "C'mon, man! If you don't want to play just hit Ctrl+C. Otherwise, enter a monetary value: " money
+            moneytest $money;;
+            4) read -p "Are you for real? Final chance! Enter the amount of money: " money
+            moneytest $money;;
+            5) read -p "OK you called my bluff. But this is your last chance! Money here: " money
+            moneytest $money;;
+            6) exit 0
+        esac
+    done
+    # If they do enter a value, say thank you!
+    printf "Thanks. "
+}
+
+# Function to get the number of games
+getgames(){
+    # Prompt for the number of games
+    read -p "How many games would you like to play? " numgames
+    
+    # If they don't give an answer, start a counter, prompt them again
+    declare -i i=0
+    
+    # Keep prompting for number of games
+    while [[ i -lt 10 && -z $numgames ]] || [[ i -lt 10 && $numgames -le 0 ]] || [[ ! $numgames =~ ^[0-9]+$ ]] || [[ ${numgames:0:1} -eq 0 ]] || [[ $numgames -ge $maxval ]]
+    do
+        # The prompt will depend on how many times they've already been asked
+        case $i in
+            0) read -p "Please enter the number of games you'd like to play. " numgames
+            gamestest $numgames;;
+            1) read -p "Please stop messing around, enter a valid number of games! " numgames
+            gamestest $numgames;;
+            2) read -p "Are you taking the piss? Enter the number of games! " numgames
+            gamestest $numgames;;
+            3) read -p "C'mon, man! If you don't want to play just hit Ctrl+C. Otherwise, enter the number of games: " numgames
+            gamestest $numgames;;
+            4) read -p "Are you for real? Final chance! Enter the number of games: " numgames
+            gamestest $numgames;;
+            5) read -p "OK you called my bluff. But this is your last chance! Number of games here: " numgames
+            gamestest $numgames;;
+            6) exit 0
+        esac
+    done
+}
+
+# Define a function that prompts for a wager
+wagerprompt(){
+    # Prompt for a wager
+    read -p "How much would you like to wager? " wager
+    # counter for how many times we've asked for a wager
+    declare -i i=0
+    # If they enter a wager that is not an integer or has a leading 0
+    while ([[ ! $wager =~ ^[0-9]+$ ]] || [[ ${wager:0:1} -eq 0 ]] || [[ -z $wager ]] || [[ $wager -eq 0 ]] || [[ $wager -ge $maxval ]] || [[ $wager -gt $money ]]) && [[ i -lt 3 ]]
+    do
+        # Increment the counter for number of prompts
+        ((i++))
+        # If the entry was missing, not integer, had a leading 0, or less than 0
+        if ([[ ! $wager =~ ^[0-9]+$ ]] || [[ ${wager:0:1} -eq 0 ]] || [[ -z $wager ]] || [[ $wager -eq 0 ]]); then
+            read -p "Please enter an integer value for your wager." wager
+            # If the wager was too big (largr than bash will allow, or larger than the remaining money)
+            elif [[ $wager -ge $maxval ]] || [[ $wager -gt $money ]]; then
+            echo "Sorry, you've tried to wager more money than you have remaining."
+            read -p "How much would you like to wager? " wager
+        fi
+    done
+    printf "You have wagered \$%i on this game.\n" $wager
+    
+    # If no wager was set above (after 3 prompts), set a random amount from the money the have remaining
+    if ([[ ! $wager =~ ^[0-9]+$ ]] || [[ ${wager:0:1} -eq 0 ]] || [[ -z $wager ]] || [[ $wager -eq 0 ]] || [[ $wager -ge $maxval ]]) && [[ i -eq 3 ]]; then
+        echo "No wager set. A random wager will be selected from your remaining money!"
+        wager=$(( 1 + $RANDOM % $money ))
+    fi
+}
+

@@ -1,0 +1,224 @@
+# Blackjack score test
+scoretest(){
+    # Make them wait
+    sleep 2
+    # If the score is 21 (blackjack)
+    if [[ $1 -eq 21 ]]; then
+        echo -e $greentext$bold "Blackjack!" $normal
+        keepplaying=1
+        win=0
+        
+        # If the score is > 21 (bust)
+        elif [[ $1 -gt 21 ]]; then
+        echo -e $bold $ulinered "Bust!" $normal $red "Your score was $totalscore." $normal
+        keepplaying=1
+        win=1
+        
+        # If they did not win and are not bust, just print out the score
+    else
+        echo -e "Current score: $totalscore."
+        keepplaying=0
+        win=1
+    fi
+}
+
+
+# Define a function to adjust the score if there's an ace in their hand
+# Takes the acescore as input
+ace(){
+    # Set inital ace score to 0
+    declare -i acescore=0
+    # If there are aces in your hand
+    if [[ ${cardlist[@]} =~ "Ace" ]]; then
+        # Get how many aces there are
+        declare -i acecount=0
+        for word in  ${cardlist[*]}; do
+            if [[ $word =~ "Ace" ]]; then
+                (( acecount++ ))
+            fi
+        done
+        # Sanity check: If choosing the lowest value for all Aces will result in Bust, do not bother asking the user what their choice is
+        if [[ $(( score + (acecount*1) )) -gt 21 ]]; then
+            return $((acecount*1))
+        else
+            # Tell the user how many aces are in their hand
+            if [[ $acecount -eq 1 ]]; then
+                echo -e "There is $bold 1 $normal Ace in your hand. You need to choose what the ace is worth."
+                elif [[ $acecount -gt 1 ]]; then
+                echo -e "There are $bold $acecount $normal Aces in your hand. You need to choose what they are worth."
+            fi
+            
+            # For each ace, ask the player what value that ace should take
+            for ((i=1; i<=acecount; i++))
+            do
+                echo -e "Ace number $i. Choose how much you want it to be worth (1 or 11). Remember, you may have more than one ace to assign!"
+                printf "If you choose 1, your running score will be $bold%i. $normal \n" $((score+acescore+1))
+                printf "If you choose 11, your running score will be $bold%i.$normal \n" $((score+acescore+11))
+                
+                # Select the value to use
+                select value in "1" "11"
+                do
+                    case $value in
+                        # If 1 was selected, add 1 to the score
+                        1|1) acescore=$acescore+1
+                            break
+                        ;;
+                        
+                        # If 11 was selected, add 11 to the score
+                        11|2) acescore=$acescore+11
+                            break
+                        ;;
+                        # If they input anything else, prompt them to choose one of the options.
+                        *) echo "Please select a value for the Ace card(s)."
+                        ;;
+                    esac
+                done
+            done
+        fi
+    fi
+    return $acescore
+}
+
+# Blackjack
+blackjack(){
+    # Echo the name of the game and your wager
+    echo -e $bold "\nWelcome to the Blackjack table!" $normal
+    
+    # Set the odds (can be anything from 5:1 to 20:1)
+    odds=$(( 5 + $RANDOM % 16 ))
+    echo -e "The odds on this game are" $bold "$odds:1" $normal
+    
+    # prompt for a wager
+    wagerprompt
+    
+    # Set lists of the suits and cards
+    suit=( Clubs Diamonds Spades Hearts )
+    card=( 2 3 4 5 6 7 8 9 10 Jack Queen King Ace )
+    
+    # Set the values of the cards
+    declare -A values
+    values[2]=2;    values[3]=3;    values[4]=4;    values[5]=5;    values[6]=6
+    values[7]=7;    values[8]=8;    values[9]=9;    values[10]=10;  values[Jack]=10
+    values[Queen]=10;               values[King]=10;                values[Ace]=0
+    
+    # Set initial score for all cards except Aces to 0
+    declare -i score=0
+    
+    # Set number of cards in hand
+    declare -i cardsinhand=0
+    
+    # Print the progress of the game
+    echo "Dealing..."
+    # Make them wait
+    sleep 2
+    
+    # List of cards already in your hand (so we play the game without replacement)
+    declare -a cardlist=()
+    
+    # Get the suits of the two cards that were dealt
+    for i in 1 2
+    do
+        # Random Suit
+        local -i rand_suit=$[$RANDOM % ${#suit[@]}]
+        # Random Card number - give a number for the index in the list of card names, NOT the card name
+        local -i rand_card=$[$RANDOM % ${#card[@]}]
+        # Generate the card name
+        cardname="${card[$rand_card]} of ${suit[$rand_suit]}"
+        
+        # If that combo has already been dealt, try again
+        while [[ ${cardlist[@]} =~ $cardname ]]
+        do
+            local -i rand_suit=$[$RANDOM % ${#suit[@]}]
+            local -i rand_card=$[$RANDOM % ${#card[@]}]
+            cardname="${card[$rand_card]} of ${suit[$rand_suit]}"
+        done
+        
+        # Append that cardname to the list of cardnames to check against
+        cardlist+=($cardname)
+        # Print to user the card they were dealt
+        echo "Card $i: $cardname"
+        # Calculate score, add one more card to hand
+        ((score+=${values[${card[$rand_card]}]}))
+        ((cardsinhand++))
+    done
+    
+    # Print progress of game
+    echo "Dealt. Calculating score of dealt hand..."
+    
+    # Check if there were aces drawn, and if so let the user select the values
+    ace
+    acescore=$?
+    
+    # Get the total score
+    declare -i totalscore=$score+$acescore
+    
+    # Score test
+    scoretest $totalscore
+    
+    # If they did not win or lose, ask if they want to keep playing.
+    while [[ $win -eq 1 && $keepplaying -eq 0 ]];
+    do
+        echo "Would you like to draw another card?"
+        select cont in "Yes" "No"
+        do
+            case $cont in
+                yes|Y|YES|Yes|y) echo "Drawing another card..."
+                    # Make them wait
+                    sleep 2
+                    # Random Suit
+                    local -i rand_suit=$[$RANDOM % ${#suit[@]}]
+                    # Random Card - give a number for the index in the list of card names, NOT the card name
+                    local -i rand_card=$[$RANDOM % ${#card[@]}]
+                    
+                    # Generate the card name
+                    cardname="${card[$rand_card]} of ${suit[$rand_suit]}"
+                    
+                    # If that combo has already been dealt, try again
+                    while [[ ${cardlist[@]} =~ $cardname ]]
+                    do
+                        local -i rand_suit=$[$RANDOM % ${#suit[@]}]
+                        local -i rand_card=$[$RANDOM % ${#card[@]}]
+                        cardname="${card[$rand_card]} of ${suit[$rand_suit]}"
+                    done
+                    # Append that cardname to the list of cardnames to check against
+                    cardlist+=($cardname)
+                    
+                    # Increment the card counter
+                    ((cardsinhand++))
+                    # Print to user the card they were dealt
+                    echo "Card $cardsinhand: $cardname"
+                    # Calculate score, add one more card to hand
+                    ((score+=${values[${card[$rand_card]}]}))
+                    # Check if there were any aces which we need to assign a value to
+                    ace
+                    acescore=$?
+                    
+                    # Get the total score
+                    declare -i totalscore=$score+$acescore
+                    
+                    # Score test
+                    scoretest $totalscore
+                    break
+                ;;
+                # If they select no, and decide to withdraw from the game
+                no|N|NO|No|n) echo "You've chosen not to draw another card.";
+                    keepplaying=1
+                    win=1
+                    break
+                ;;
+                *) echo "Unknown option. Please select yes or no."
+            esac
+        done
+    done
+    
+    # If they got blackjack, they win some more money based on the odds from the start of the game.
+    if [[ $win -eq 0 ]]; then
+        winnings=$(( $wager * $odds ))
+        echo -e $greentext "Congratulations! You have won \$$winnings on this game of Blackjack." $normal
+        ((money=$money+$winnings))
+        # If they went bust or called it quits, they lose their wager
+        elif [[ $win -eq 1 && $keepplaying -eq 1 ]]; then
+        echo -e $red $bold "Better luck next time!" $normal "You spent \$$wager on this game of Blackjack."
+        ((money=$money-$wager))
+    fi
+}

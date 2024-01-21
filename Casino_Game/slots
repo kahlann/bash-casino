@@ -1,0 +1,81 @@
+
+# Function to run the slot machine - takes the game number as input
+runslots(){
+    
+    # Set the array to the correct emoji array
+    if [[ $1 -eq 1 ]]; then
+        arr=( "🍉" "🍒" "🥥" "🍓" "🫐" "🍑" "🍏" "🍍" )
+        greet="Slot machine 1: Fruit!"
+        elif [[ $1 -eq 2 ]]; then
+        arr=( "🐘" "🦭" "🐖" "🦊" "🦔" "🐧" "🐅" "🦫" )
+        greet="Slot machine 2: Animals!"
+        elif [[ $1 -eq 3 ]]; then
+        arr=( "🫧" "🧼" "🧻" "🧹" "🧴" "🛁" "🧽" "🚽" )
+        greet="Slot machine 3: Cleaning!"
+    fi
+    
+    # Get the index of each icon to be displayed
+    slot1=$(($RANDOM % ${#arr[@]}))
+    slot2=$(($RANDOM % ${#arr[@]}))
+    slot3=$(($RANDOM % ${#arr[@]}))
+    
+    # Pull the one armed bandit
+    echo -e "\n$bold$greet$normal"
+    echo -e "Pulling the one-armed bandit...\n"
+    sleep 2
+    # Display the slots
+    printf "\t${arr[$slot1]}" ; sleep 1
+    printf "\t${arr[$slot2]}" ; sleep 1
+    printf "\t${arr[$slot3]}" ; sleep 1
+    echo -e "\n"
+    
+    # If the slot numbers are all equal, you won!
+    if [[ $slot1 -eq $slot2 && $slot1 -eq $slot3 ]]; then
+        win=0
+        # If they're not all equal, you lost this round
+    else
+        win=1
+    fi
+}
+
+
+# Slots
+slots(){
+    # Welcome the player to the slots machine
+    echo -e $bold "\nWelcome to the slot machines!" $normal
+    echo "With each wager you put down, you'll be able to play up to 3 rounds on the slot machines."
+    
+    # Set the odds (can be anything from 20:1 to 100:1)
+    odds=$(( 20 + $RANDOM % 81 ))
+    echo -e "The odds on this game are" $bold "$odds:1" $normal
+    
+    # prompt for a wager
+    wagerprompt
+    
+    # Set inital win value to 1, game number to 1
+    win=1
+    round=1
+    
+    # While we haven't won, and we're on our first, second, or third go
+    while [[ $win -eq 1 && $round -lt 4 ]]
+    do
+        # Pull the one-armed bandit again
+        runslots $round
+        # Iterate the game counter
+        ((round++))
+    done
+    
+    # Finish the game
+    #echo one line for aesthetics
+    echo
+    # if they won, given them some money
+    if [[ $win -eq 0 ]]; then
+        winnings=$(( $wager * $odds ))
+        echo -e $greentext $bold "Congratulations! $normal You have won \$$winnings on this game of Slots." $normal
+        ((money=$money+$winnings))
+        # If they lost, take their money
+    else
+        echo -e $red $bold "Better luck next time!" $normal " You spent \$$wager on this game of Slots."
+        ((money=$money-$wager))
+    fi
+}
