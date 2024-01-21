@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # Import the other scripts that contain the prompts, games etc
+# Need to change this so the file path is robust!
 source Casino_Game/formatting
 source Casino_Game/prompts
 source Casino_Game/blackjack

@@ -1,4 +1,8 @@
-# Learning Bash Scripting 
+# Bash Casino
+This repository contains a casino game (currently blackjack and slots), written in bash. The repository is forked from the LinkedIn Learning Course 'Learning Bash Scripting' (below) - this game was developed for the chapter 2 and 3 challenges. 
+
+
+## Forked from: Learning Bash Scripting 
 This is the repository for the LinkedIn Learning course Learning Bash Scripting. The full course is available from [LinkedIn Learning][lil-course-url].
 
 ![Learning Bash Scripting ][lil-thumbnail-url]
