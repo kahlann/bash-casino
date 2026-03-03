@@ -7,7 +7,7 @@ maxval=$((2**32))
 # Test function - did they enter a name?
 # First argument must be the name variable
 nametest(){
-    # If they did not enter a name, or the input contains something other than alpha caharcters, iterate the counter for the next message
+    # If they did not enter a name, or the input contains something other than alpha characters, iterate the counter for the next message
     if [[ ! $name =~ $validname ]] || [[ -z $1 ]]; then
         ((i++))
         # if the name is valid, set the name variable to that input string
@@ -19,7 +19,7 @@ nametest(){
 # Test function - did they enter a valid age?
 # First argument must be the age variable
 agetest(){
-    # If the age is not greater than 0, does not exist, is not an integer, has a leading 0 (will be interprested as an octal number), or greater than/equal to 2^32, iterate the counter for the next message
+    # If the age is not greater than 0, does not exist, is not an integer, has a leading 0 (will be interpreted as an octal number), or greater than/equal to 2^32, iterate the counter for the next message
     if [[ ! $1 -gt 0 ]] | [[ -z $1  ]] || [[ ! $1 =~ ^[0-9]+$ ]] || [[ ${1:0:1} -eq 0 ]] || [[ $1 -ge $maxval ]]; then
         ((i++))
         # If it's a valid age, set the age variable to that input
@@ -45,15 +45,11 @@ getname(){
             nametest $name;;
             1) read -p "Please enter your name! " name
             nametest $name;;
-            2) read -p "Are you taking the piss? Enter your name! " name
+            2)  read -p "Final chance! Enter your name. " name
             nametest $name;;
-            3) read -p "C'mon, man! If you don't want to play just hit Ctrl+C. Otherwise, enter your name: " name
+            3) read -p "OK you called my bluff. But this is your last chance! Name here: " name
             nametest $name;;
-            4) read -p "Are you for real? Final chance! Enter your name: " name
-            nametest $name;;
-            5) read -p "OK you called my bluff. But this is your last chance! Name here: " name
-            nametest $name;;
-            6) exit 0
+            4) exit 0
         esac
     done
     # If they do enter a name, say thank you!
@@ -76,17 +72,13 @@ getage(){
         case $i in
             0) read -p "Please enter your age. " age
             agetest $age;;
-            1) read -p "Please stop messing around, enter your age! " age
+            1) read -p "Please enter your age! " age
             agetest $age;;
-            2) read -p "Are you taking the piss? Enter your age! " age
+            2) read -p "Final chance! Enter your age. " age
             agetest $age;;
-            3) read -p "C'mon, man! If you don't want to play just hit Ctrl+C. Otherwise, enter your age: " age
+            3) read -p "OK you called my bluff. But this is your last chance! Age here: " age
             agetest $age;;
-            4) read -p "Are you for real? Final chance! Enter your age: " age
-            agetest $age;;
-            5) read -p "OK you called my bluff. But this is your last chance! Age here: " age
-            agetest $age;;
-            6) exit 0
+            4) exit 0
         esac
     done
     
@@ -140,17 +132,13 @@ getmoney(){
         case $i in
             0) read -p "Please enter the amount of money you'd like to bring into the casino. " money
             moneytest $money;;
-            1) read -p "Please stop stop messing around, enter a number! " money
+            1) read -p "Enter a number! " money
             moneytest $money;;
-            2) read -p "Are you taking the piss? Give us your money! " money
+            2) read -p "Final chance! Enter the amount of money: " money
             moneytest $money;;
-            3) read -p "C'mon, man! If you don't want to play just hit Ctrl+C. Otherwise, enter a monetary value: " money
+            3) read -p "OK you called my bluff. But this is your last chance! Money here: " money
             moneytest $money;;
-            4) read -p "Are you for real? Final chance! Enter the amount of money: " money
-            moneytest $money;;
-            5) read -p "OK you called my bluff. But this is your last chance! Money here: " money
-            moneytest $money;;
-            6) exit 0
+            4) exit 0
         esac
     done
     # If they do enter a value, say thank you!
@@ -172,17 +160,13 @@ getgames(){
         case $i in
             0) read -p "Please enter the number of games you'd like to play. " numgames
             gamestest $numgames;;
-            1) read -p "Please stop messing around, enter a valid number of games! " numgames
+            1) read -p "Please enter a valid number of games! " numgames
             gamestest $numgames;;
-            2) read -p "Are you taking the piss? Enter the number of games! " numgames
+            2) read -p "Final chance! Enter the number of games: " numgames
             gamestest $numgames;;
-            3) read -p "C'mon, man! If you don't want to play just hit Ctrl+C. Otherwise, enter the number of games: " numgames
+            3) read -p "OK you called my bluff. But this is your last chance! Number of games here: " numgames
             gamestest $numgames;;
-            4) read -p "Are you for real? Final chance! Enter the number of games: " numgames
-            gamestest $numgames;;
-            5) read -p "OK you called my bluff. But this is your last chance! Number of games here: " numgames
-            gamestest $numgames;;
-            6) exit 0
+            4) exit 0
         esac
     done
 }
